@@ -1,6 +1,5 @@
 package podcast;
 
-
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -44,14 +43,16 @@ public class PodcastShell {
 	public static void main(String args[]) {
 		SpringApplication.run(PodcastShell.class, args);
 	}
-}
 
+}
 
 @Component
 class PodcastPromptProvider implements PromptProvider {
 
 	private Podcast podcast;
+
 	private File introduction;
+
 	private File interview;
 
 	@Override
@@ -61,11 +62,11 @@ class PodcastPromptProvider implements PromptProvider {
 
 		if (podcast != null) {
 			return new AttributedString(this.buildPromptForPodcast() + promptTerminal,
-				AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+					AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 		}
 		else {
 			return new AttributedString("(no podcast created yet) " + promptTerminal,
-				AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
+					AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
 		}
 	}
 
@@ -103,11 +104,13 @@ class PodcastPromptProvider implements PromptProvider {
 		return msg;
 	}
 
-	private static void addLabeledFileToPrompt(String introductionLabel, ArrayList<String> list, File introduction) {
+	private static void addLabeledFileToPrompt(String introductionLabel,
+			ArrayList<String> list, File introduction) {
 		if (null != introduction) {
 			list.add(introductionLabel + introduction.getName());
 		}
 	}
+
 }
 
 class PodcastStartedEvent extends ApplicationEvent {
@@ -120,6 +123,7 @@ class PodcastStartedEvent extends ApplicationEvent {
 	public Podcast getSource() {
 		return (Podcast) super.getSource();
 	}
+
 }
 
 abstract class FileEvent extends ApplicationEvent {
@@ -132,6 +136,7 @@ abstract class FileEvent extends ApplicationEvent {
 	public FileEvent(File source) {
 		super(source);
 	}
+
 }
 
 class IntroductionFileEvent extends FileEvent {
@@ -139,14 +144,15 @@ class IntroductionFileEvent extends FileEvent {
 	IntroductionFileEvent(File source) {
 		super(source);
 	}
-}
 
+}
 
 class PackageCreatedEvent extends FileEvent {
 
-	public PackageCreatedEvent(File source) {
+	PackageCreatedEvent(File source) {
 		super(source);
 	}
+
 }
 
 class InterviewFileEvent extends FileEvent {
@@ -154,6 +160,7 @@ class InterviewFileEvent extends FileEvent {
 	InterviewFileEvent(File source) {
 		super(source);
 	}
+
 }
 
 @Log4j2
@@ -162,15 +169,18 @@ class InterviewFileEvent extends FileEvent {
 class PodcastCommands {
 
 	private static final String MEDIA_ARG = "--media";
+
 	private static final String DISCOVERY_ARG = "--description";
+
 	private final ApplicationEventPublisher publisher;
+
 	private final ThreadLocal<Podcast> podcast = new ThreadLocal<>();
 
 	private File intro, interview, archive;
 
-
 	public Availability newPodcastAvailabilityCheck() {
-		return !isPodcastStarted() ? Availability.available() : Availability.unavailable("you're already producing a new podcast");
+		return !isPodcastStarted() ? Availability.available()
+				: Availability.unavailable("you're already producing a new podcast");
 	}
 
 	private static void log(String msg) {
@@ -178,7 +188,8 @@ class PodcastCommands {
 	}
 
 	public Availability addMediaAvailabilityCheck() {
-		return isPodcastStarted() ? Availability.available() : Availability.unavailable("you need to start a new podcast");
+		return isPodcastStarted() ? Availability.available()
+				: Availability.unavailable("you need to start a new podcast");
 	}
 
 	@ShellMethodAvailability("newPodcastAvailabilityCheck")
@@ -218,15 +229,17 @@ class PodcastCommands {
 
 	@ShellMethod
 	public void publishForProcessing() {
-		//todo this is where we would publish the pacakge to the integration endpoint
+		// todo this is where we would publish the pacakge to the integration endpoint
+		// todo make sure to send a checksum as well
+
 	}
 
 	@ShellMethod(value = "package")
 	public void createPackage() {
 		var ext = extensionFor(this.intro);
 		var aPackage = this.getPodcast()
-			.addMedia(ext, new Media(ext, this.intro, this.interview))
-			.createPackage();
+				.addMedia(ext, new Media(ext, this.intro, this.interview))
+				.createPackage();
 
 		publisher.publishEvent(new PackageCreatedEvent(aPackage));
 	}
@@ -234,7 +247,8 @@ class PodcastCommands {
 	@EventListener
 	public void packageCreated(PackageCreatedEvent event) {
 		this.archive = event.getSource();
-		System.out.println("The podcast archive has been written to " + event.getSource().getAbsolutePath());
+		System.out.println("The podcast archive has been written to "
+				+ event.getSource().getAbsolutePath());
 	}
 
 	private Podcast getPodcast() {
@@ -244,6 +258,7 @@ class PodcastCommands {
 	private boolean isPodcastStarted() {
 		return (getPodcast() != null);
 	}
+
 }
 
 @Data
@@ -261,13 +276,16 @@ class Media {
 		this.intro = intro;
 		this.interview = interview;
 	}
+
 }
 
 @Log4j2
 class Podcast {
 
 	private String description, uid;
+
 	private String MP3_EXT = "mp3";
+
 	private String WAV_EXT = "wav";
 
 	private final Map<String, Optional<Media>> media = new ConcurrentHashMap<>();
@@ -284,22 +302,20 @@ class Podcast {
 		return description;
 	}
 
-
 	public Podcast addMedia(String ext, Media media) {
 		this.media.put(ext, Optional.of(media));
 		return this;
 	}
 
 	public File createPackage() {
-		return doCreatePackage(this.description,
-			this.uid,
-			this.media.get(MP3_EXT).orElse(null),
-			this.media.get(WAV_EXT).orElse(null)
-		);
+		return doCreatePackage(this.description, this.uid,
+				this.media.get(MP3_EXT).orElse(null),
+				this.media.get(WAV_EXT).orElse(null));
 	}
 
 	@SneakyThrows
-	private static File doCreatePackage(String description, String uid, Media mp3, Media wav) {
+	private static File doCreatePackage(String description, String uid, Media mp3,
+			Media wav) {
 
 		var staging = Files.createTempDirectory("staging").toFile();
 
@@ -317,10 +333,10 @@ class Podcast {
 		addMediaFilesToPackage(wav, srcFiles);
 
 		try (var outputStream = new BufferedOutputStream(new FileOutputStream(zipFile));
-							var zipOutputStream = new ZipOutputStream(outputStream)) {
+				var zipOutputStream = new ZipOutputStream(outputStream)) {
 			for (var fileToZip : srcFiles) {
 				try (var inputStream = new BufferedInputStream(
-					new FileInputStream(fileToZip))) {
+						new FileInputStream(fileToZip))) {
 					var zipEntry = new ZipEntry(fileToZip.getName());
 					zipOutputStream.putNextEntry(zipEntry);
 					StreamUtils.copy(inputStream, zipOutputStream);
@@ -330,7 +346,8 @@ class Podcast {
 		return zipFile;
 	}
 
-	private static void addElementFor(Document doc, Element root, String elementName, Map<String, String> attrs) {
+	private static void addElementFor(Document doc, Element root, String elementName,
+			Map<String, String> attrs) {
 		Element element = doc.createElement(elementName);
 		attrs.forEach(element::setAttribute);
 		root.appendChild(element);
@@ -347,7 +364,8 @@ class Podcast {
 	}
 
 	@SneakyThrows
-	private static String buildXmlManifestForPackage(String description, String uid, Media mp3, Media wav) {
+	private static String buildXmlManifestForPackage(String description, String uid,
+			Media mp3, Media wav) {
 
 		var docFactory = DocumentBuilderFactory.newInstance();
 		var docBuilder = docFactory.newDocumentBuilder();
