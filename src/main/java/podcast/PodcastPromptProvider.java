@@ -26,11 +26,11 @@ class PodcastPromptProvider implements PromptProvider {
 
 		if (podcast != null) {
 			return new AttributedString(this.buildPromptForPodcast() + promptTerminal,
-				AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+					AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 		}
 		else {
 			return new AttributedString("(no podcast created yet) " + promptTerminal,
-				AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
+					AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
 		}
 	}
 
@@ -69,7 +69,7 @@ class PodcastPromptProvider implements PromptProvider {
 	}
 
 	private static void addLabeledFileToPrompt(String introductionLabel,
-																																												ArrayList<String> list, File introduction) {
+			ArrayList<String> list, File introduction) {
 		if (null != introduction) {
 			list.add(introductionLabel + introduction.getName());
 		}

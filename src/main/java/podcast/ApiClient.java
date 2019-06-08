@@ -16,10 +16,10 @@ import java.io.File;
 class ApiClient {
 
 	private final String serverUrl;
+
 	private final RestTemplate restTemplate;
 
-	ApiClient(@Value("${podcast.api.url}") String serverUrl,
-											RestTemplate template) {
+	ApiClient(@Value("${podcast.api.url}") String serverUrl, RestTemplate template) {
 		this.serverUrl = serverUrl;
 		this.restTemplate = template;
 	}
@@ -30,8 +30,10 @@ class ApiClient {
 		var resource = new FileSystemResource(archivePackage);
 		var body = new LinkedMultiValueMap<String, Object>();
 		body.add("file", resource);
-		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body,
+				headers);
 		var response = restTemplate.postForEntity(serverUrl, requestEntity, String.class);
 		return response.getStatusCode().is2xxSuccessful();
 	}
+
 }

@@ -51,15 +51,14 @@ class Podcast {
 
 	public File createPackage() {
 		this.archivePackage = doCreatePackage(this.description, this.uid,
-			this.media.get(MP3_EXT).orElse(null),
-			this.media.get(WAV_EXT).orElse(null));
+				this.media.get(MP3_EXT).orElse(null),
+				this.media.get(WAV_EXT).orElse(null));
 		return this.archivePackage;
 	}
 
-
 	@SneakyThrows
 	private static File doCreatePackage(String description, String uid, Media mp3,
-																																					Media wav) {
+			Media wav) {
 
 		var staging = Files.createTempDirectory("staging").toFile();
 
@@ -77,10 +76,10 @@ class Podcast {
 		addMediaFilesToPackage(wav, srcFiles);
 
 		try (var outputStream = new BufferedOutputStream(new FileOutputStream(zipFile));
-							var zipOutputStream = new ZipOutputStream(outputStream)) {
+				var zipOutputStream = new ZipOutputStream(outputStream)) {
 			for (var fileToZip : srcFiles) {
 				try (var inputStream = new BufferedInputStream(
-					new FileInputStream(fileToZip))) {
+						new FileInputStream(fileToZip))) {
 					var zipEntry = new ZipEntry(fileToZip.getName());
 					zipOutputStream.putNextEntry(zipEntry);
 					StreamUtils.copy(inputStream, zipOutputStream);
@@ -91,7 +90,7 @@ class Podcast {
 	}
 
 	private static void addElementFor(Document doc, Element root, String elementName,
-																																			Map<String, String> attrs) {
+			Map<String, String> attrs) {
 		Element element = doc.createElement(elementName);
 		attrs.forEach(element::setAttribute);
 		root.appendChild(element);
@@ -109,7 +108,7 @@ class Podcast {
 
 	@SneakyThrows
 	private static String buildXmlManifestForPackage(String description, String uid,
-																																																		Media mp3, Media wav) {
+			Media mp3, Media wav) {
 
 		var docFactory = DocumentBuilderFactory.newInstance();
 		var docBuilder = docFactory.newDocumentBuilder();

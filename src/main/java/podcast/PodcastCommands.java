@@ -36,12 +36,12 @@ class PodcastCommands {
 
 	public Availability newPodcastAvailabilityCheck() {
 		return !isPodcastStarted() ? Availability.available()
-			: Availability.unavailable("you're already producing a new podcast");
+				: Availability.unavailable("you're already producing a new podcast");
 	}
 
 	public Availability addMediaAvailabilityCheck() {
 		return isPodcastStarted() ? Availability.available()
-			: Availability.unavailable("you need to start a new podcast");
+				: Availability.unavailable("you need to start a new podcast");
 	}
 
 	@ShellMethodAvailability("newPodcastAvailabilityCheck")
@@ -79,7 +79,6 @@ class PodcastCommands {
 		return trim;
 	}
 
-
 	@ShellMethod(value = "publish")
 	public void publishForProcessing() {
 		// todo this is where we would publish the pacakge to the integration endpoint
@@ -91,8 +90,8 @@ class PodcastCommands {
 	public void createPackage() {
 		var ext = extensionFor(this.intro);
 		var aPackage = this.getPodcast()
-			.addMedia(ext, new Media(ext, this.intro, this.interview))
-			.createPackage();
+				.addMedia(ext, new Media(ext, this.intro, this.interview))
+				.createPackage();
 
 		publisher.publishEvent(new PackageCreatedEvent(aPackage));
 	}
@@ -101,7 +100,7 @@ class PodcastCommands {
 	public void packageCreated(PackageCreatedEvent event) {
 		this.archive = event.getSource();
 		System.out.println("The podcast archive has been written to "
-			+ event.getSource().getAbsolutePath());
+				+ event.getSource().getAbsolutePath());
 	}
 
 	private Podcast getPodcast() {
