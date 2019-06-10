@@ -15,6 +15,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static podcast.FileUtils.extensionFor;
+
 @Log4j2
 @ShellComponent
 @RequiredArgsConstructor
@@ -30,9 +32,7 @@ class PodcastCommands {
 
 	private File intro, interview, archive;
 
-	private static void log(String msg) {
-		log.info(msg);
-	}
+	private final ApiClient apiClient;
 
 	public Availability newPodcastAvailabilityCheck() {
 		return !isPodcastStarted() ? Availability.available()
@@ -69,28 +69,23 @@ class PodcastCommands {
 		return (f != null && Arrays.asList("wav", "mp3").contains(extensionFor(f)));
 	}
 
-	private String extensionFor(File file) {
-		var name = file.getName();
-		var lastIndexOf = name.lastIndexOf(".");
-		var trim = name.substring(lastIndexOf).toLowerCase().trim();
-		if (trim.startsWith(".")) {
-			return trim.substring(1);
-		}
-		return trim;
-	}
-
 	@ShellMethod(value = "publish")
 	public void publishForProcessing() {
 		// todo this is where we would publish the pacakge to the integration endpoint
 		// todo make sure to send a checksum as well
-
+		Assert.notNull(this.archive, "the archive must not be null");
+		Assert.isTrue(apiClient.publishPackage(this.archive),
+				"could not publish the package archive");
 	}
 
 	@ShellMethod(value = "package")
 	public void createPackage() {
 		var ext = extensionFor(this.intro);
-		var aPackage = this.getPodcast()
-				.addMedia(ext, new Media(ext, this.intro, this.interview))
+
+		Assert.notNull(this.interview, "the interview file must be specified");
+		Assert.notNull(this.intro, "the introduction file must be specified");
+
+		var aPackage = this.getPodcast().addMedia(ext, this.intro, this.interview)
 				.createPackage();
 
 		publisher.publishEvent(new PackageCreatedEvent(aPackage));

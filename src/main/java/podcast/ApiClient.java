@@ -24,14 +24,13 @@ class ApiClient {
 		this.restTemplate = template;
 	}
 
-	public boolean publish(File archivePackage) {
+	public boolean publishPackage(File archivePackage) {
 		var headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		var resource = new FileSystemResource(archivePackage);
 		var body = new LinkedMultiValueMap<String, Object>();
 		body.add("file", resource);
-		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body,
-				headers);
+		var requestEntity = new HttpEntity<MultiValueMap<String, Object>>(body, headers);
 		var response = restTemplate.postForEntity(serverUrl, requestEntity, String.class);
 		return response.getStatusCode().is2xxSuccessful();
 	}

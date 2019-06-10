@@ -40,16 +40,20 @@ class Podcast {
 		this.media.put(WAV_EXT, Optional.empty());
 	}
 
-	public String getDescription() {
+	String getDescription() {
 		return description;
 	}
 
-	public Podcast addMedia(String ext, Media media) {
+	Podcast addMedia(String ext, File intro, File interv) {
+		return this.addMedia(ext, new Media(ext, intro, interv));
+	}
+
+	private Podcast addMedia(String ext, Media media) {
 		this.media.put(ext, Optional.of(media));
 		return this;
 	}
 
-	public File createPackage() {
+	File createPackage() {
 		this.archivePackage = doCreatePackage(this.description, this.uid,
 				this.media.get(MP3_EXT).orElse(null),
 				this.media.get(WAV_EXT).orElse(null));
